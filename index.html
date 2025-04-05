@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>今日の予定</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    ul {
+      padding-left: 1em;
+    }
+    li {
+      background: white;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #00c300;
+      color: white;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📅 今日の予定</h1>
+  <ul id="event-list">読み込み中...</ul>
+
+  <button onclick="sendCheck()">✅ 確認したことをLINEに送る</button>
+
+  <script>
+    async function main() {
+      await liff.init({ liffId: "2007196836-XbnzBlbo" });
+
+      const res = await fetch("https://script.google.com/macros/s/AKfycbxZM8mNgqtN88ZelVCoXjLUnnAn5jVaipIUJ7CvynNfxO3xZl0Pbxo2x6hoQyb1II0O/exec"); // GASのWebアプリURLに置き換え
+      const events = await res.json();
+
+      const list = document.getElementById("event-list");
+      list.innerHTML = "";
+
+      if (events.length === 0) {
+        list.innerHTML = "<li>今日は予定がありません。</li>";
+        return;
+      }
+
+      events.forEach(e => {
+        const li = document.createElement("li");
+        li.textContent = `${e.start}〜${e.end}：${e.title}`;
+        list.appendChild(li);
+      });
+    }
+
+    async function sendCheck() {
+      try {
+        await liff.sendMessages([
+          {
+            type: "text",
+            text: "✅ 今日の予定を確認しました！"
+          }
+        ]);
+        liff.closeWindow();
+      } catch (err) {
+        alert("メッセージ送信に失敗しました: " + err.message);
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
